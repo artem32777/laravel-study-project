@@ -1,0 +1,14 @@
+services:
+    postgres:
+        image: postgres:17
+        ports:
+            - "5432:5432"
+        environment:
+            POSTGRES_USER: lara
+            POSTGRES_PASSWORD: secret
+            POSTGRES_DB: lara_n
+        volumes:
+            - lara-postgres-data:/var/lib/postgresql/data
+
+volumes:
+    lara-postgres-data:

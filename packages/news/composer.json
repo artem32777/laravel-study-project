@@ -1,0 +1,25 @@
+{
+    "name": "lara-n/news",
+    "description": "News module",
+    "type": "library",
+    "license": "MIT",
+    "version": "1.0.0",
+    "require": {
+        "php": "^8.3",
+        "laravel/framework": "^13.17"
+    },
+    "autoload": {
+        "psr-4": {
+            "LaraN\\News\\": "src/",
+            "LaraN\\News\\Database\\Factories\\": "database/factories/",
+            "LaraN\\News\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "LaraN\\News\\Providers\\NewsServiceProvider"
+            ]
+        }
+    }
+}
