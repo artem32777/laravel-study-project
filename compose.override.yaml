@@ -1,0 +1,10 @@
+services:
+  app:
+    volumes:
+      - .:/app
+      - lara-vendor:/app/vendor
+      - lara-bootstrap-cache:/app/bootstrap/cache
+
+volumes:
+  lara-vendor:
+  lara-bootstrap-cache:
