@@ -10,6 +10,7 @@ use Illuminate\Validation\Rule;
 use LaraN\News\Models\NewsCategory;
 use LaraN\News\Platform\Layouts\Category\NewsCategoryEditLayout;
 use LaraN\News\Platform\Layouts\NewsTabMenu;
+use LaraN\News\Rules\Slug;
 use Orchid\Screen\Actions\Button;
 use Orchid\Screen\Screen;
 use Orchid\Support\Facades\Layout;
@@ -52,7 +53,7 @@ class NewsCategoryEditScreen extends Screen
     {
         $validated = $request->validate([
             'category.name' => ['required', 'string', 'max:255'],
-            'category.slug' => ['required', 'string', 'max:255', Rule::unique(NewsCategory::class, 'slug')],
+            'category.slug' => ['required', 'string', 'max:255', new Slug,  Rule::unique(NewsCategory::class, 'slug')],
         ]);
 
         $category = new NewsCategory;

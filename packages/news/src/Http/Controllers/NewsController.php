@@ -3,27 +3,30 @@
 namespace LaraN\News\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
+use LaraN\News\Exceptions\NewsNotViewableException;
+use LaraN\News\Http\Requests\NewsIndexRequest;
 use LaraN\News\Models\News;
 use LaraN\News\Models\NewsCategory;
+use Throwable;
 
 class NewsController extends Controller
 {
-    public function index(Request $request): View
+    public function index(NewsIndexRequest $request): View
     {
-        $categorySlugs = $request->collect('category')->filter()->values();
-        $title = $request->string('title')->trim()->toString();
-        $publishedAt = $request->date('published_at');
+        $title = $request->title();
+        $category = $request->category();
+        $publishedAt = $request->publishedAt();
 
         $newsList = News::query()
             ->published()
             ->when(
-                $categorySlugs->isNotEmpty(),
+                $category !== '',
                 fn (Builder $query) => $query->whereHas(
                     'categories',
-                    fn (Builder $query) => $query->whereIn('slug', $categorySlugs),
+                    fn (Builder $query) => $query->where('slug', $category),
                 ),
             )
             ->when(
@@ -40,8 +43,7 @@ class NewsController extends Controller
             ->withQueryString();
 
         $categories = NewsCategory::query()
-            ->orderBy('name')
-            ->get();
+            ->orderBy('name')->get();
 
         return view('news::index', [
             'newsList' => $newsList,
@@ -49,9 +51,12 @@ class NewsController extends Controller
         ]);
     }
 
+    /**
+     * @throws NewsNotViewableException | Throwable
+     */
     public function show(News $news): View
     {
-        abort_if($news->published_at === null || $news->published_at->isFuture(), 404);
+        throw_unless(Gate::allows('view', $news), NewsNotViewableException::class);
 
         $news->load(['categories', 'author']);
 

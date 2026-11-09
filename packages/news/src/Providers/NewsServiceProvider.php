@@ -2,8 +2,11 @@
 
 namespace LaraN\News\Providers;
 
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use LaraN\News\Events\NewsCreated;
+use LaraN\News\Listeners\LogNewsCreation;
 
 class NewsServiceProvider extends ServiceProvider
 {
@@ -14,6 +17,7 @@ class NewsServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+
         $this->loadMigrationsFrom(__DIR__.'/../../database/migrations');
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'news');
 
@@ -27,5 +31,8 @@ class NewsServiceProvider extends ServiceProvider
             ->group(function (): void {
                 $this->loadRoutesFrom(__DIR__.'/../../routes/api.php');
             });
+
+        Event::listen(NewsCreated::class, LogNewsCreation::class);
+
     }
 }

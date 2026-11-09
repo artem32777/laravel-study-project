@@ -3,25 +3,22 @@
 namespace LaraN\News\Http\Controllers\Api;
 
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Gate;
+use LaraN\News\Exceptions\NewsNotViewableException;
+use LaraN\News\Http\Requests\NewsIndexRequest;
 use LaraN\News\Http\Resources\NewsResource;
 use LaraN\News\Models\News;
+use Throwable;
 
 class NewsController extends Controller
 {
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(NewsIndexRequest $request): AnonymousResourceCollection
     {
-        $validated = $request->validate([
-            'title' => ['nullable', 'string', 'max:255'],
-            'published_at' => ['nullable', 'date'],
-            'category' => ['nullable', 'string', 'max:255'],
-        ]);
-
-        $title = trim($validated['title'] ?? '');
-        $publishedAt = $validated['published_at'] ?? null;
-        $category = trim($validated['category'] ?? '');
+        $title = $request->title();
+        $category = $request->category();
+        $publishedAt = $request->publishedAt();
 
         $newsList = News::query()
             ->published()
@@ -52,12 +49,12 @@ class NewsController extends Controller
         return NewsResource::collection($newsList);
     }
 
+    /**
+     * @throws NewsNotViewableException | Throwable
+     */
     public function show(News $news): NewsResource
     {
-        abort_if(
-            $news->published_at === null || $news->published_at->isFuture(),
-            404,
-        );
+        throw_unless(Gate::allows('view', $news), NewsNotViewableException::class);
 
         $news->load(['categories', 'author']);
 

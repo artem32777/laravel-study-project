@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Orchid\Layouts\Role;
 
-use Illuminate\Support\Collection;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Orchid\Screen\Field;
 use Orchid\Screen\Fields\CheckBox;
-use Orchid\Screen\Fields\Group;
+use Orchid\Screen\Fields\ViewField;
 use Orchid\Screen\Layouts\Rows;
 use Throwable;
 
@@ -22,9 +22,10 @@ class RolePermissionLayout extends Rows
     /**
      * The screen's layout elements.
      *
-     * @throws Throwable
      *
      * @return Field[]
+     *
+     * @throws Throwable
      */
     public function fields(): array
     {
@@ -45,16 +46,17 @@ class RolePermissionLayout extends Rows
 
     private function makeCheckBoxGroup(Collection $permissions, string $title): Collection
     {
-        return $permissions
+        $checkboxes = $permissions
             ->map(fn (array $chunks) => $this->makeCheckBox(collect($chunks)))
             ->flatten()
-            ->map(fn (CheckBox $checkbox, $key) => $key === 0
-                ? $checkbox->title($title)
-                : $checkbox)
-            ->chunk(4)
-            ->map(fn (Collection $checkboxes) => Group::make($checkboxes->toArray())
-                ->alignEnd()
-                ->autoWidth());
+            ->map(fn (CheckBox $checkbox): string => (string) $checkbox);
+
+        return collect([
+            ViewField::make('permission-group-'.md5($title))
+                ->view('orchid.permission-group')
+                ->set('title', $title)
+                ->set('checkboxes', $checkboxes->all()),
+        ]);
     }
 
     private function makeCheckBox(Collection $chunks): CheckBox

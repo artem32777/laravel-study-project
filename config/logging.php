@@ -135,6 +135,13 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        'news' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/news.log'),
+            'level' => 'info',
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];
